@@ -107,6 +107,11 @@ const contactRoutes = require("./routes/contact");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// 1. Ajoute cette route avant tes autres routes
+app.get("/ping", (req, res) => {
+  res.status(200).send("pong");
+});
+
 // Connexion à la base de données
 connectDB();
 
@@ -184,10 +189,19 @@ app.use((err, req, res, next) => {
 });
 
 // Lancement du serveur
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`\n🍽️  Maison Noir API lancée sur le port ${PORT}`);
   console.log(`📍 Mode: ${process.env.NODE_ENV}`);
   console.log(`🌐 URL Frontend autorisée: ${process.env.FRONTEND_URL}`);
+
+  // 2. Système d'auto-ping pour garder le serveur éveillé
+  // Remplace l'URL par la tienne si elle change
+  setInterval(() => {
+    axios
+      .get("https://restaurant-backend2-r5qb.onrender.com/ping")
+      .then(() => console.log("Self-ping success"))
+      .catch((err) => console.log("Self-ping failed", err.message));
+  }, 600000); // 600 000 ms = 10 minutes
 
   // Logique de Self-Ping pour contrer le "Cold Start" sur Render
   if (process.env.NODE_ENV === "production" && process.env.BACKEND_URL) {
